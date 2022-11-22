@@ -1,0 +1,5 @@
+privateServer:
+  Addr: :8080
+
+publicServer:
+  Addr: :8081

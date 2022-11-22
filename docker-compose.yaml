@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  user-grade:
+    image: user-grade-service
+    restart: always
+    build:
+      context: ./
+      dockerfile: ./build/multistage.Dockerfile
+#    depends_on:
+#      database:
+#        condition: service_healthy
+    ports:
+      - "8080:8080"
+      - "8081:8081"
