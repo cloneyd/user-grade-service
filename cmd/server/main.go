@@ -1,9 +1,11 @@
 package main
 
 import (
-	_uuid "github.com/google/uuid"
 	"log"
+	"os"
 	"sync"
+	"time"
+	"wb-test-task-2022/internal/backup"
 	"wb-test-task-2022/internal/config"
 	"wb-test-task-2022/internal/usergrade/delivery/natsstreaming"
 
@@ -13,7 +15,7 @@ import (
 func main() {
 	log.Println("starting service")
 
-	cfgFile, err := config.LoadConfig("/config/config-docker")
+	cfgFile, err := config.LoadConfig(os.Getenv("CONFIG_PATH"))
 	if err != nil {
 		log.Fatalf("error loading config: %v\n", err)
 	}
@@ -23,19 +25,25 @@ func main() {
 		log.Fatalf("error parsing config: %v\n", err)
 	}
 
+	datasource := sync.Map{}
+
+	timestamp := time.Now()
+	replicaType := os.Getenv("REPLICA_TYPE")
+	// 1. в текущем примере гибель мастера может быть фатальной, и вести к рассинхронизации реплик
+	// 2. мастер отличается от слейвов
+	if replicaType == "slave" {
+		timestamp, err = backup.LoadBackup(&datasource)
+		if err != nil {
+			log.Fatalln(err)
+		}
+	}
+
 	sc, err := natsstreaming.NewStanConn(cfg.StanConn)
 	if err != nil {
 		log.Fatalf("error connecting to nats-streamin: %v\n", err)
 	}
 
-	datasource := sync.Map{}
-
-	uuid, err := _uuid.NewUUID()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	s := server.NewServer(uuid, cfg, sc, &datasource)
+	s := server.NewServer(cfg, sc, timestamp, &datasource)
 
 	if err1, err2 := s.Run(); err1 != nil {
 		log.Fatalln(err1)

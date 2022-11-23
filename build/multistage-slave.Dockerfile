@@ -10,7 +10,7 @@ COPY ./go.sum ./
 RUN go mod download
 
 COPY ./cmd ./cmd
-COPY ./config ./config
+COPY ./config/config-docker-slave.yml ./config/config-docker-slave.yml
 COPY ./internal ./internal
 
 WORKDIR /app/cmd/server

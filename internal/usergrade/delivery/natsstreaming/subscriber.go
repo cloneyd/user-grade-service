@@ -3,9 +3,9 @@ package natsstreaming
 import (
 	"encoding/json"
 	"log"
+	"os"
 	"time"
 
-	_uuid "github.com/google/uuid"
 	"github.com/nats-io/stan.go"
 
 	"wb-test-task-2022/internal/config"
@@ -13,18 +13,19 @@ import (
 )
 
 type UserGradeSubscriber struct {
-	uuid    _uuid.UUID
-	cfg     *config.Config
-	conn    stan.Conn
-	handler stan.MsgHandler
+	id        string
+	cfg       *config.Config
+	conn      stan.Conn
+	timestamp time.Time
+	handler   stan.MsgHandler
 }
 
-func NewUserGradeSubscriber(uuid _uuid.UUID, cfg *config.Config, conn stan.Conn, handler stan.MsgHandler) *UserGradeSubscriber {
-	return &UserGradeSubscriber{uuid: uuid, cfg: cfg, conn: conn, handler: handler}
+func NewUserGradeSubscriber(cfg *config.Config, conn stan.Conn, timestamp time.Time, handler stan.MsgHandler) *UserGradeSubscriber {
+	return &UserGradeSubscriber{id: os.Getenv("REPLICA_TYPE"), cfg: cfg, conn: conn, timestamp: timestamp, handler: handler}
 }
 
-func (sub *UserGradeSubscriber) Subscribe(time time.Time) (stan.Subscription, error) {
-	return sub.conn.Subscribe(sub.cfg.StanConn.Subject, sub.handler, stan.SetManualAckMode(), stan.StartAtTime(time))
+func (sub *UserGradeSubscriber) Subscribe() (stan.Subscription, error) {
+	return sub.conn.Subscribe(sub.cfg.StanConn.Subject, sub.handler, stan.SetManualAckMode(), stan.StartAtTime(sub.timestamp))
 }
 
 func HandleUserGrade(msg *stan.Msg) {
@@ -40,9 +41,9 @@ func HandleUserGrade(msg *stan.Msg) {
 		return
 	}
 
-	//if userGradeMessage.PublisherUUID == sub.uuid {
-	//	return
-	//}
+	if userGradeMessage.PublisherId == os.Getenv("REPLICA_TYPE") {
+		return
+	}
 
 	logger.LogUserGrade(userGradeMessage.Payload)
 }

@@ -3,7 +3,6 @@ package domain
 import (
 	"github.com/nats-io/stan.go"
 	"strconv"
-	"time"
 )
 
 type UserGrade struct {
@@ -31,7 +30,7 @@ type UserGradePublisher interface {
 }
 
 type UserGradeSubscriber interface {
-	Subscribe(time time.Time) (stan.Subscription, error)
+	Subscribe() (stan.Subscription, error)
 }
 
 func (ug *UserGrade) Update(new *UserGrade) {

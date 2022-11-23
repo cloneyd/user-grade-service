@@ -2,6 +2,7 @@ package backup
 
 import (
 	"log"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -22,4 +23,17 @@ func GenerateBackupFilePath(format string, timestamp time.Time) string {
 	sb.WriteString(format)
 
 	return sb.String()
+}
+
+func GetTimestampFromFilename(filename string) (time.Time, error) {
+	res := strings.TrimPrefix(filename, "attachment; filename=backup__")
+	res = strings.TrimSuffix(res, filepath.Ext(filename))
+	res = strings.TrimSuffix(res, filepath.Ext(res))
+
+	t, err := time.Parse(timestampLayout, res)
+	if err != nil {
+		return time.Now(), err
+	}
+
+	return t, nil
 }

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	_uuid "github.com/google/uuid"
 	"github.com/nats-io/stan.go"
 	"log"
 	"net/http"
@@ -19,21 +18,21 @@ import (
 const ctxTimeout = 5
 
 type Server struct {
-	uuid       _uuid.UUID
 	cfg        *config.Config
 	public     *http.Server
 	private    *http.Server
 	conn       stan.Conn
+	timestamp  time.Time
 	datasource *sync.Map
 }
 
-func NewServer(uuid _uuid.UUID, cfg *config.Config, conn stan.Conn, datasource *sync.Map) *Server {
+func NewServer(cfg *config.Config, conn stan.Conn, timestamp time.Time, datasource *sync.Map) *Server {
 	return &Server{
-		uuid:       uuid,
 		cfg:        cfg,
 		public:     &http.Server{Addr: cfg.PublicServer.Addr},
 		private:    &http.Server{Addr: cfg.PrivateServer.Addr},
 		conn:       conn,
+		timestamp:  timestamp,
 		datasource: datasource,
 	}
 }
@@ -55,7 +54,7 @@ func (s *Server) Run() (error, error) {
 
 	var sub stan.Subscription
 	go func(sub stan.Subscription) {
-		subscriber := natsstreaming.NewUserGradeSubscriber(s.uuid, s.cfg, s.conn, natsstreaming.HandleUserGrade)
+		subscriber := natsstreaming.NewUserGradeSubscriber(s.cfg, s.conn, s.timestamp, natsstreaming.HandleUserGrade)
 		sub, err := subscriber.Subscribe(time.Now())
 		if err != nil {
 			log.Fatalln(err)
@@ -66,14 +65,6 @@ func (s *Server) Run() (error, error) {
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 
 	<-quit
-
-	if err := sub.Unsubscribe(); err != nil {
-		log.Fatalln(err)
-	}
-
-	if err := sub.Close(); err != nil {
-		log.Fatalln(err)
-	}
 
 	ctx, shutdown := context.WithTimeout(context.Background(), ctxTimeout*time.Second)
 	defer shutdown()

@@ -1,0 +1,10 @@
+privateServer:
+  Addr: ":8080"
+
+publicServer:
+  Addr: ":8081"
+
+stanConn:
+  ClusterId: "test-cluster"
+  ClientId: "user-grade-service-master"
+  Subject: "user-grade"

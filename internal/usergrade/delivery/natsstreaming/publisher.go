@@ -2,8 +2,8 @@ package natsstreaming
 
 import (
 	"encoding/json"
+	"os"
 
-	_uuid "github.com/google/uuid"
 	"github.com/nats-io/stan.go"
 
 	"wb-test-task-2022/internal/config"
@@ -11,17 +11,17 @@ import (
 )
 
 type UserGradePublisher struct {
-	uuid _uuid.UUID
+	id   string
 	cfg  *config.Config
 	conn stan.Conn
 }
 
-func NewUserGradePublisher(uuid _uuid.UUID, cfg *config.Config, conn stan.Conn) *UserGradePublisher {
-	return &UserGradePublisher{uuid: uuid, cfg: cfg, conn: conn}
+func NewUserGradePublisher(cfg *config.Config, conn stan.Conn) *UserGradePublisher {
+	return &UserGradePublisher{id: os.Getenv("REPLICA_TYPE"), cfg: cfg, conn: conn}
 }
 
 func (pub *UserGradePublisher) Publish(userGrade *domain.UserGrade) error {
-	message := NewUserGradeMessage(pub.uuid, userGrade)
+	message := NewUserGradeMessage(pub.id, userGrade)
 
 	body, err := json.Marshal(message)
 	if err != nil {

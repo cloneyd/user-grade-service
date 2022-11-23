@@ -1,10 +1,10 @@
 privateServer:
-  Addr: ":8080"
+  Addr: ":8082"
 
 publicServer:
-  Addr: ":8081"
+  Addr: ":8083"
 
 stanConn:
   ClusterId: "test-cluster"
-  ClientId: "user-grade-service"
+  ClientId: "user-grade-service-slave"
   Subject: "user-grade"

@@ -15,7 +15,7 @@ import (
 func (s *Server) MapHandlers() {
 	userGradeRepo := storage.NewUserGradeRepo(s.datasource)
 
-	userGradePublisher := natsstreaming.NewUserGradePublisher(s.uuid, s.cfg, s.conn)
+	userGradePublisher := natsstreaming.NewUserGradePublisher(s.cfg, s.conn)
 
 	userGradeUseCase := usecase.NewUserGradeUseCase(userGradePublisher, userGradeRepo)
 
