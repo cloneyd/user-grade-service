@@ -6,33 +6,33 @@ import (
 	"wb-test-task-2022/internal/domain"
 )
 
-type Repo struct {
+type UserGradeRepository struct {
 	data *sync.Map
 }
 
-func NewUserGradeRepo(data *sync.Map) *Repo {
-	return &Repo{data: data}
+func NewUserGradeRepo(data *sync.Map) *UserGradeRepository {
+	return &UserGradeRepository{data: data}
 }
 
-func (r *Repo) GetById(id string) (*domain.UserGrade, error) {
-	val, ok := r.data.Load(id)
+func (repo *UserGradeRepository) GetById(id string) (*domain.UserGrade, error) {
+	val, ok := repo.data.Load(id)
 	if !ok {
 		return nil, NotFoundError
 	}
 	return val.(*domain.UserGrade), nil
 }
 
-func (r *Repo) Save(userGrade *domain.UserGrade) {
-	actual, ok := r.data.LoadOrStore(userGrade.UserId, userGrade)
+func (repo *UserGradeRepository) Save(userGrade *domain.UserGrade) {
+	actual, ok := repo.data.LoadOrStore(userGrade.UserId, userGrade)
 	if ok {
 		actual.(*domain.UserGrade).Update(userGrade)
 	}
 }
 
-func (r *Repo) List() []domain.UserGrade {
+func (repo *UserGradeRepository) List() []domain.UserGrade {
 	var userGrades []domain.UserGrade
 
-	r.data.Range(func(key, value any) bool {
+	repo.data.Range(func(key, value any) bool {
 		userGrades = append(userGrades, *value.(*domain.UserGrade))
 		return true
 	})

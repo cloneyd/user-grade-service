@@ -15,7 +15,7 @@ import (
 func (s *Server) MapHandlers() {
 	userGradeRepo := storage.NewUserGradeRepo(s.datasource)
 
-	userGradePublisher := natsstreaming.NewUserGradePublisher(s.cfg, s.conn)
+	userGradePublisher := natsstreaming.NewUserGradePublisher(s.uuid, s.cfg, s.conn)
 
 	userGradeUseCase := usecase.NewUserGradeUseCase(userGradePublisher, userGradeRepo)
 
@@ -24,10 +24,10 @@ func (s *Server) MapHandlers() {
 	privateRouter := mux.NewRouter().StrictSlash(true)
 	privateRouter.Use(middleware.BasicAuth)
 	privateRouter.HandleFunc("/set", userGradeHandlers.Set).Methods(http.MethodPost)
-	privateRouter.HandleFunc("/backup", userGradeHandlers.Backup).Methods(http.MethodGet)
 
 	publicRouter := mux.NewRouter().StrictSlash(true)
 	publicRouter.HandleFunc("/get", userGradeHandlers.Get).Methods(http.MethodGet)
+	publicRouter.HandleFunc("/backup", userGradeHandlers.Backup).Methods(http.MethodGet) // нужна аутентификация
 
 	s.private.Handler = privateRouter
 	s.public.Handler = publicRouter

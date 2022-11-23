@@ -24,6 +24,7 @@ WORKDIR /
 
 ENV BASIC_USERNAME=cloneyd
 ENV BASIC_PASSWORD=hello
+ENV BACKUP_PATH=/backup/
 
 COPY --from=build /user-grade-service /user-grade-service
 COPY ./config /config

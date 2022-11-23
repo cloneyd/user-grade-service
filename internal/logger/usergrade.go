@@ -2,11 +2,10 @@ package logger
 
 import (
 	"log"
-
 	"wb-test-task-2022/internal/domain"
 )
 
-func LogUserGrade(userGrade domain.UserGrade) {
+func LogUserGrade(userGrade *domain.UserGrade) {
 	log.Printf(`
 UserId: %s
 PostpaidLimit: %d

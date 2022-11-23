@@ -1,8 +1,8 @@
 privateServer:
-  Addr: :8080
+  Addr: ":8080"
 
 publicServer:
-  Addr: :8081
+  Addr: ":8081"
 
 stanConn:
   ClusterId: "test-cluster"

@@ -1,12 +1,8 @@
 package middleware
 
 import (
-	"crypto/sha256"
-	"crypto/subtle"
 	"net/http"
 	"os"
-
-	"wb-test-task-2022/internal/convert"
 )
 
 func BasicAuth(next http.Handler) http.Handler {
@@ -16,14 +12,8 @@ func BasicAuth(next http.Handler) http.Handler {
 			username, password, ok := r.BasicAuth()
 
 			if ok {
-				usernameHash := sha256.Sum256(convert.StringToBytes(username))
-				passwordHash := sha256.Sum256(convert.StringToBytes(password))
-
-				expectedUsernameHash := sha256.Sum256(convert.StringToBytes(expectedUsername))
-				expectedPasswordHash := sha256.Sum256(convert.StringToBytes(expectedPassword))
-
-				usernameMatch := subtle.ConstantTimeCompare(usernameHash[:], expectedUsernameHash[:]) == 1
-				passwordMatch := subtle.ConstantTimeCompare(passwordHash[:], expectedPasswordHash[:]) == 1
+				usernameMatch := username == expectedUsername
+				passwordMatch := password == expectedPassword
 
 				if usernameMatch && passwordMatch {
 					next.ServeHTTP(w, r)

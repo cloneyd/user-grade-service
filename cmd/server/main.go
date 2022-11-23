@@ -1,6 +1,7 @@
 package main
 
 import (
+	_uuid "github.com/google/uuid"
 	"log"
 	"sync"
 	"wb-test-task-2022/internal/config"
@@ -29,7 +30,12 @@ func main() {
 
 	datasource := sync.Map{}
 
-	s := server.NewServer(cfg, sc, &datasource)
+	uuid, err := _uuid.NewUUID()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	s := server.NewServer(uuid, cfg, sc, &datasource)
 
 	if err1, err2 := s.Run(); err1 != nil {
 		log.Fatalln(err1)

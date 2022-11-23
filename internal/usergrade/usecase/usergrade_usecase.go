@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"encoding/json"
 	"wb-test-task-2022/internal/domain"
 )
 
@@ -19,13 +18,10 @@ func (u *UserGradeUseCase) GetById(id string) (*domain.UserGrade, error) {
 }
 
 func (u *UserGradeUseCase) Save(userGrade *domain.UserGrade) error {
-	body, err := json.Marshal(userGrade)
-	if err != nil {
+	if err := u.pub.Publish(userGrade); err != nil {
 		return err
 	}
-	if err = u.pub.Publish(body); err != nil {
-		return err
-	}
+
 	u.repo.Save(userGrade)
 
 	return nil

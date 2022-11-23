@@ -1,14 +1,13 @@
 package v1
 
 import (
-	"compress/gzip"
-	"encoding/csv"
 	"encoding/json"
 	"errors"
-	"log"
-	"net/http"
-
+	"fmt"
 	"github.com/go-playground/validator/v10"
+	"net/http"
+	"time"
+	"wb-test-task-2022/internal/backup"
 	"wb-test-task-2022/internal/domain"
 	"wb-test-task-2022/internal/usergrade/repository/storage"
 )
@@ -22,6 +21,8 @@ func NewUserGradeHandlers(userGradeUseCase domain.UserGradeUseCase) *UserGradeHa
 }
 
 func (h *UserGradeHandlers) Get(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
 	userId := r.URL.Query().Get("user_id")
 
 	userGrade, err := h.userGradeUseCase.GetById(userId)
@@ -40,8 +41,6 @@ func (h *UserGradeHandlers) Get(w http.ResponseWriter, r *http.Request) {
 		errorAsJSON(w, http.StatusInternalServerError, err)
 		return
 	}
-
-	w.Header().Set("Content-Type", "application/json")
 }
 
 func (h *UserGradeHandlers) Set(w http.ResponseWriter, r *http.Request) {
@@ -67,26 +66,14 @@ func (h *UserGradeHandlers) Set(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserGradeHandlers) Backup(w http.ResponseWriter, _ *http.Request) {
-	w.Header().Set("Content-Disposition", "attachment; filename=backup.csv.gz")
+	filename := backup.GenerateBackupFilePath("csv.gz", time.Now())
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", filename))
 	w.Header().Set("Content-Type", "application/gzip")
 
-	zipWriter := gzip.NewWriter(w)
-	csvWriter := csv.NewWriter(zipWriter)
-
 	userGrades := h.userGradeUseCase.List()
-	for _, userGrade := range userGrades {
-		err := csvWriter.Write(userGrade.Fields())
-		if err != nil {
-			errorAsJSON(w, http.StatusInternalServerError, err)
-			return
-		}
-	}
 
-	csvWriter.Flush()
-	if err := zipWriter.Flush(); err != nil {
-		log.Println(err)
-	}
-	if err := zipWriter.Close(); err != nil {
-		log.Println(err)
+	if err := backup.CreateDump(w, userGrades); err != nil {
+		errorAsJSON(w, http.StatusInternalServerError, err)
+		return
 	}
 }
