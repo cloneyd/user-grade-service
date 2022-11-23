@@ -3,9 +3,10 @@ package main
 import (
 	"log"
 	"sync"
+	"wb-test-task-2022/internal/config"
+	"wb-test-task-2022/internal/usergrade/delivery/natsstreaming"
 
 	"wb-test-task-2022/internal/server"
-	"wb-test-task-2022/pkg/config"
 )
 
 func main() {
@@ -13,16 +14,22 @@ func main() {
 
 	cfgFile, err := config.LoadConfig("/config/config-docker")
 	if err != nil {
-		log.Fatalf("error loading config: %v", err)
+		log.Fatalf("error loading config: %v\n", err)
 	}
 
 	cfg, err := config.ParseConfig(cfgFile)
 	if err != nil {
-		log.Fatalf("error parsing config: %v", err)
+		log.Fatalf("error parsing config: %v\n", err)
+	}
+
+	sc, err := natsstreaming.NewStanConn(cfg.StanConn)
+	if err != nil {
+		log.Fatalf("error connecting to nats-streamin: %v\n", err)
 	}
 
 	datasource := sync.Map{}
-	s := server.NewServer(cfg, &datasource)
+
+	s := server.NewServer(cfg, sc, &datasource)
 
 	if err1, err2 := s.Run(); err1 != nil {
 		log.Fatalln(err1)

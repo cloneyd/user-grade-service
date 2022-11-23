@@ -10,10 +10,17 @@ import (
 type Config struct {
 	PublicServer  ServerConfig
 	PrivateServer ServerConfig
+	StanConn      StanConfig
 }
 
 type ServerConfig struct {
 	Addr string
+}
+
+type StanConfig struct {
+	ClusterId string
+	ClientId  string
+	Subject   string
 }
 
 func LoadConfig(filename string) (*viper.Viper, error) {

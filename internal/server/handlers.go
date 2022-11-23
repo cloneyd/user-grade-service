@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"wb-test-task-2022/internal/usergrade/delivery/natsstreaming"
 
 	"github.com/gorilla/mux"
 
@@ -14,15 +15,18 @@ import (
 func (s *Server) MapHandlers() {
 	userGradeRepo := storage.NewUserGradeRepo(s.datasource)
 
-	userGradeUseCase := usecase.NewUserGradeUseCase(userGradeRepo)
+	userGradePublisher := natsstreaming.NewUserGradePublisher(s.cfg, s.conn)
+
+	userGradeUseCase := usecase.NewUserGradeUseCase(userGradePublisher, userGradeRepo)
 
 	userGradeHandlers := v1.NewUserGradeHandlers(userGradeUseCase)
 
 	privateRouter := mux.NewRouter().StrictSlash(true)
-	publicRouter := mux.NewRouter().StrictSlash(true)
-
 	privateRouter.Use(middleware.BasicAuth)
 	privateRouter.HandleFunc("/set", userGradeHandlers.Set).Methods(http.MethodPost)
+	privateRouter.HandleFunc("/backup", userGradeHandlers.Backup).Methods(http.MethodGet)
+
+	publicRouter := mux.NewRouter().StrictSlash(true)
 	publicRouter.HandleFunc("/get", userGradeHandlers.Get).Methods(http.MethodGet)
 
 	s.private.Handler = privateRouter

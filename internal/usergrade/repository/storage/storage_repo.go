@@ -28,3 +28,14 @@ func (r *Repo) Save(userGrade *domain.UserGrade) {
 		actual.(*domain.UserGrade).Update(userGrade)
 	}
 }
+
+func (r *Repo) List() []domain.UserGrade {
+	var userGrades []domain.UserGrade
+
+	r.data.Range(func(key, value any) bool {
+		userGrades = append(userGrades, *value.(*domain.UserGrade))
+		return true
+	})
+
+	return userGrades
+}

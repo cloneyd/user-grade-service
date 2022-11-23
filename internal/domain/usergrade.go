@@ -1,5 +1,10 @@
 package domain
 
+import (
+	"github.com/nats-io/stan.go"
+	"strconv"
+)
+
 type UserGrade struct {
 	UserId        string `json:"user_id" validate:"required"`
 	PostpaidLimit int    `json:"postpaid_limit"`
@@ -11,11 +16,21 @@ type UserGrade struct {
 type UserGradeRepository interface {
 	GetById(id string) (*UserGrade, error)
 	Save(userGrade *UserGrade)
+	List() []UserGrade
 }
 
 type UserGradeUseCase interface {
 	GetById(id string) (*UserGrade, error)
-	Save(userGrade *UserGrade)
+	Save(userGrade *UserGrade) error
+	List() []UserGrade
+}
+
+type UserGradePublisher interface {
+	Publish(body []byte) error
+}
+
+type UserGradeSubscriber interface {
+	Subscribe() (stan.Subscription, error)
 }
 
 func (ug *UserGrade) Update(new *UserGrade) {
@@ -33,5 +48,15 @@ func (ug *UserGrade) Update(new *UserGrade) {
 
 	if ug.ReturnFee != 0 {
 		ug.ReturnFee = new.ReturnFee
+	}
+}
+
+func (ug *UserGrade) Fields() []string {
+	return []string{
+		ug.UserId,
+		strconv.Itoa(ug.PostpaidLimit),
+		strconv.Itoa(ug.Spp),
+		strconv.Itoa(ug.ShippingFee),
+		strconv.Itoa(ug.ReturnFee),
 	}
 }

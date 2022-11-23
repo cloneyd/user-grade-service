@@ -13,3 +13,7 @@ services:
     ports:
       - "8080:8080"
       - "8081:8081"
+
+  nats-streaming:
+    image: nats-streaming
+    restart: always

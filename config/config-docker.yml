@@ -3,3 +3,8 @@ privateServer:
 
 publicServer:
   Addr: :8081
+
+stanConn:
+  ClusterId: "test-cluster"
+  ClientId: "user-grade-service"
+  Subject: "user-grade"
