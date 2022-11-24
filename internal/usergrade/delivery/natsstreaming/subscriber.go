@@ -41,9 +41,11 @@ func HandleUserGrade(msg *stan.Msg) {
 		return
 	}
 
+	// Проверяем PublisherId, чтобы не обрабатывать свои сообщения
 	if userGradeMessage.PublisherId == os.Getenv("REPLICA_TYPE") {
 		return
 	}
 
+	//TODO: Здесь должно быть сохранение данных других реплик в storage, но я не успел
 	logger.LogUserGrade(userGradeMessage.Payload)
 }
