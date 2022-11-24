@@ -24,8 +24,8 @@ func LoadBackup(datasource *sync.Map) (time.Time, error) {
 		return time.Now(), err
 	}
 
-	for _, userGrade := range userGrades {
-		datasource.Store(userGrade.UserId, &userGrade)
+	for i := 0; i < len(userGrades); i++ {
+		datasource.Store(userGrades[i].UserId, &userGrades[i])
 	}
 
 	if err = resp.Body.Close(); err != nil {

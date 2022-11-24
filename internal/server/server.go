@@ -55,7 +55,7 @@ func (s *Server) Run() (error, error) {
 	var sub stan.Subscription
 	go func(sub stan.Subscription) {
 		subscriber := natsstreaming.NewUserGradeSubscriber(s.cfg, s.conn, s.timestamp, natsstreaming.HandleUserGrade)
-		sub, err := subscriber.Subscribe(time.Now())
+		sub, err := subscriber.Subscribe()
 		if err != nil {
 			log.Fatalln(err)
 		}
